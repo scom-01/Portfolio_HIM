@@ -10,12 +10,6 @@ public class NavMove : MonoBehaviour
     public float moveSpeed = 8.0f;
     private float OneStep = 0.1f;
     private float h, v;
-    private float x;
-    private Transform tr;
-    private Rigidbody rigid;
-    private Vector3 moveDir;
-    //회전 속도 변수
-    //float rotSpeed = 10.0f;
 
     [Header("Audio")]
     public AudioClip[] walkClip;
@@ -26,9 +20,7 @@ public class NavMove : MonoBehaviour
     public GameObject FootStepObj;
     public FloorMtrl Mtrl;
 
-    //[Header("Collider")]
-    //public CapsuleCollider Capsule;
-
+    //벽을 통과하거나 낑기는 현상을 방지하기위해 NavMeshAgent로 이동
     [Header("Nav")]
     NavMeshAgent agent;
     public GameObject NavCam;
@@ -36,8 +28,6 @@ public class NavMove : MonoBehaviour
     public static float PlayerHeight = 1.2f;
     public static NavMove Inst;
 
-    RaycastHit hit;
-    Ray ray;
     Vector3 MoveStepPos = Vector3.zero;
 
     private void Awake()
@@ -49,25 +39,25 @@ public class NavMove : MonoBehaviour
         agent.height = GlobalValue.PlayerHeight;
         agent.baseOffset = GlobalValue.PlayerHeight * 0.5f;
     }
+
     // Start is called before the first frame update
     void Start()
     {
-        rigid = GetComponent<Rigidbody>();
-        //스크립스 처음에 Transform 컴포넌트 할당
-        tr = GetComponent<Transform>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        ray.origin = this.transform.position;
-        ray.direction = NavCam.transform.forward;
-        Debug.DrawRay(ray.origin, ray.direction * 5.0f, Color.red);
-
-        if (GameMgr.Deltatime <= 0.0f)
+        if (GlobalValue.g_GameState == GameState.Die)
             return;
 
-        Mtrl = FootPos.GetComponent<FloorSoundMtrl>().Mtrl;
+        if (GlobalValue.Deltatime <= 0.0f)
+        {
+            return;
+        }
+            
+
+        Mtrl = FootPos.GetComponent<FloorSoundMtrl>().Mtrl;         //플레이어뿐만 아니라 Enemy의 발소리도 전환하기위해 별도의 클래스 생성
 
         Move();
     }//void FixedUpdate()
@@ -91,7 +81,7 @@ public class NavMove : MonoBehaviour
 
         if (h != 0 || v != 0)
         {
-            MoveStepPos = ((NavCam.transform.forward * v) + (NavCam.transform.right * h)).normalized * GameMgr.Deltatime * 15.0f;
+            MoveStepPos = ((NavCam.transform.forward * v) + (NavCam.transform.right * h)).normalized * GlobalValue.Deltatime * 15.0f;
 
             OneStep = 0.1f;         //한걸음 걷고나서 다음 걸음 다시 계산하기위해 초기화
 
@@ -124,7 +114,7 @@ public class NavMove : MonoBehaviour
             {
                 if (GlobalValue.FlashGage < 100.0f)
                 {
-                    GlobalValue.FlashGage += GameMgr.Deltatime * 2;
+                    GlobalValue.FlashGage += GlobalValue.Deltatime * 2;
                     if (GlobalValue.FlashGage >= 100.0f)
                     {
                         GlobalValue.FlashGage = 100.0f;
@@ -138,7 +128,7 @@ public class NavMove : MonoBehaviour
     void StepSound()    //발 아래 재질에 따라 다른 사운드
     {
         Vector3 FootStepPosition = FootPos.transform.position;
-        audTime += GameMgr.Deltatime;
+        audTime += GlobalValue.Deltatime;                           //발자국 소리 딜레이
 
         if (audTime >= 1.2f && v < 0 && Input.GetKey(GlobalValue.Sit) && Input.GetKey(GlobalValue.Move_Back))   //앉으면서 뒤로 갈 때
         {

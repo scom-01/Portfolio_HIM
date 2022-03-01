@@ -5,23 +5,23 @@ using UnityEngine.UI;
 
 public class SoundSetting : MonoBehaviour
 {
-    public Slider BGM_Slider;
-    public Toggle BGM_OnOff;
-    public SliderSetting m_BGM;
+    [SerializeField] private Slider BGM_Slider;
+    [SerializeField] private Toggle BGM_OnOff;
+    [SerializeField] private SliderSetting m_BGM;
 
-    public Slider SE_Slider;
-    public Toggle SE_OnOff;
-    public SliderSetting m_SE;
+    [SerializeField] private Slider SE_Slider;
+    [SerializeField] private Toggle SE_OnOff;
+    [SerializeField] private SliderSetting m_SE;
 
     [Header("Button")]
-    public Button SaveBtn;
-    public Button CancleBtn;
-    public Button ResetBtn;
+    [SerializeField] private Button SaveBtn;
+    [SerializeField] private Button CancleBtn;
+    [SerializeField] private Button ResetBtn;
 
     [Header("Message")]
-    public GameObject Message;
-    public Button OkBtn;
-    public Button NoBtn;
+    [SerializeField] private GameObject Message;
+    [SerializeField] private Button OkBtn;
+    [SerializeField] private Button NoBtn;
 
     
     
@@ -64,6 +64,12 @@ public class SoundSetting : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Setting();
+    }
+
+    void Setting()
+    {
+        //설정값에 따른 사운드 On Off
         if (BGM_OnOff.isOn)
             GlobalValue.BGM_Bool = 0;
         else

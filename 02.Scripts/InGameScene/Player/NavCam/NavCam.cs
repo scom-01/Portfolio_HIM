@@ -42,7 +42,7 @@ public class NavCam : MonoBehaviour
 
     void Rotate()
     {
-        if (Setting.SettingBool)
+        if (GlobalValue.SettingBool)
         {
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.Confined;
@@ -53,7 +53,7 @@ public class NavCam : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
         }
 
-        if (GameMgr.Deltatime <= 0.0f)
+        if (GlobalValue.Deltatime <= 0.0f)
             return;
 
         y += Input.GetAxis("Mouse Y") * PlayerPrefs.GetFloat("mouseSpeed", 5.0f) * 0.2f;
@@ -69,7 +69,7 @@ public class NavCam : MonoBehaviour
         if (Input.GetKey(GlobalValue.Sit))  // KeyCode.LeftControl))
         {
             if (_height > NavMove.PlayerHeight * 0.5f)
-                _height -= GameMgr.Deltatime * 5.0f;   // == 0.1f;
+                _height -= GlobalValue.Deltatime * 5.0f;   // == 0.1f;
             else if (_height <= NavMove.PlayerHeight * 0.5f)
                 _height = NavMove.PlayerHeight * 0.5f;
 
@@ -80,7 +80,7 @@ public class NavCam : MonoBehaviour
         else
         {
             if (_height < NavMove.PlayerHeight)
-                _height += GameMgr.Deltatime * 5.0f;   // == 0.1f;
+                _height += GlobalValue.Deltatime * 5.0f;   // == 0.1f;
             else if (_height >= NavMove.PlayerHeight)
                 _height = NavMove.PlayerHeight;
 
@@ -106,13 +106,13 @@ public class NavCam : MonoBehaviour
             {
                 if (PeekingX > 0)
                 {
-                    PeekingX -= GameMgr.Deltatime;
+                    PeekingX -= GlobalValue.Deltatime;
                     if (PeekingX <= 0.0f)
                         PeekingX = 0.0f;
                 }
                 else if (PeekingX < 0)
                 {
-                    PeekingX += GameMgr.Deltatime;
+                    PeekingX += GlobalValue.Deltatime;
                     if (PeekingX >= 0.0f)
                         PeekingX = 0.0f;
                 }
@@ -122,13 +122,13 @@ public class NavCam : MonoBehaviour
             {
                 if (PeekingRot > 0)
                 {
-                    PeekingRot -= GameMgr.Deltatime * PeekSpeed;
+                    PeekingRot -= GlobalValue.Deltatime * PeekSpeed;
                     if (PeekingRot <= 0.0f)
                         PeekingRot = 0.0f;
                 }
                 else
                 {
-                    PeekingRot += GameMgr.Deltatime * PeekSpeed;
+                    PeekingRot += GlobalValue.Deltatime * PeekSpeed;
                     if (PeekingRot >= 0.0f)
                         PeekingRot = 0.0f;
                 }
@@ -142,14 +142,14 @@ public class NavCam : MonoBehaviour
     {
         if (PeekingX < MaxPeeckX)
         {
-            PeekingX += GameMgr.Deltatime; //Time.deltaTime;
+            PeekingX += GlobalValue.Deltatime; //Time.deltaTime;
             if (PeekingX >= MaxPeeckX)
                 PeekingX = MaxPeeckX;
         }
 
         if (PeekingRot > -MaxPeeckRot)
         {
-            PeekingRot -= GameMgr.Deltatime * PeekSpeed;
+            PeekingRot -= GlobalValue.Deltatime * PeekSpeed;
             if (PeekingRot <= -MaxPeeckRot)
                 PeekingRot = -MaxPeeckRot;
         }
@@ -161,14 +161,14 @@ public class NavCam : MonoBehaviour
     {
         if (PeekingX > -MaxPeeckX)
         {
-            PeekingX -= GameMgr.Deltatime; //Time.deltaTime;
+            PeekingX -= GlobalValue.Deltatime; //Time.deltaTime;
             if (PeekingX <= -MaxPeeckX)
                 PeekingX = -MaxPeeckX;
         }
 
         if (PeekingRot < MaxPeeckRot)
         {
-            PeekingRot += GameMgr.Deltatime * PeekSpeed;
+            PeekingRot += GlobalValue.Deltatime * PeekSpeed;
             if (PeekingRot >= MaxPeeckRot)
                 PeekingRot = MaxPeeckRot;
         }

@@ -15,11 +15,6 @@ public class PlayerState : MonoBehaviour
     {
         Inst = this;
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
@@ -29,14 +24,16 @@ public class PlayerState : MonoBehaviour
             if (Hp < 0.0f)
             {
                 Hp = 0.0f;
-                GlobalValue.g_GameState = GameState.Die;
+                GlobalValue.g_GameState = GameState.Die;    //체력소모시 사망
                 return;
             }
-            Hp += GameMgr.Deltatime * 2;
+
+            Hp += GlobalValue.Deltatime * 2;        //초당 2씩 체력회복
+
             if (Hp >= 100.0f)
                 Hp = 100.0f;
 
-            if(Setting.SettingBool)
+            if(GlobalValue.SettingBool)
             {
                 aud.Pause();
             }

@@ -14,17 +14,13 @@ public class ItemFocusUI : MonoBehaviour
     {
         Inst = this;
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
     {
         Item_InteractionObj.SetActive(GlobalValue.ItemUIOnOff);
 
+        // "Use 키를 눌러 상호작용" 에서 Use키값
         ImgText.text = ((KeyCode)PlayerPrefs.GetInt("Use", (int)KeyCode.F)).ToString();
     }
 

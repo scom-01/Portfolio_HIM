@@ -14,13 +14,11 @@ public enum GameState
 
 public class GameMgr : MonoBehaviour
 {
-    public static float Deltatime = 0.02f;
-    
-    public GameObject Pointer;
+    public GameObject Pointer;      //Mouse Pointer
 
-    public GameObject StoryObj;
-    public GameObject EndObj;
-    public GameObject DieObj;
+    public GameObject StoryObj;     //HelpText UI
+    public GameObject EndObj;       //Thanks for Playing (Text)
+    public GameObject DieObj;       //You Die (Text)
 
     public Image Hp_Img;
 
@@ -32,19 +30,12 @@ public class GameMgr : MonoBehaviour
 
     public AudioClip[] BGM_Clip;
     public AudioSource aud;
-    float Delay = 0.0f;
-    int HelpIdx = 0;
+    float Delay = 0.0f;                 //Enter키로 설명을 넘길 시 빠르게 두번 넘어가지않도록 하는 변수
+    int HelpIdx = 0;                    //HelpText Idx
     // Start is called before the first frame update
     void Start()
     {
-        DieObj.SetActive(false);
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
-        Pointer.SetActive(true);
-
-        Delay = 0.0f;
-        HelpIdx = 0;
-        Spawn = false;
+        SetUp();
     }
 
     // Update is called once per frame
@@ -57,19 +48,17 @@ public class GameMgr : MonoBehaviour
         }
             
 
-        //if(Input.GetKeyDown(KeyCode.Escape))
-        //{
-        if (Setting.SettingBool)            
-            Deltatime = 0.0f;    
-        else    
-            GameMgr.Deltatime = 0.02f;            
-        //}
+        if (GlobalValue.SettingBool)            
+            GlobalValue.Deltatime = 0.0f;    
+        else
+            GlobalValue.Deltatime = 0.02f;      
+        
 
-        Pointer.SetActive(!Setting.SettingBool);     
+        Pointer.SetActive(!GlobalValue.SettingBool);     
         
         if(GlobalValue.g_GameState == GameState.Starting || GlobalValue.g_GameState == GameState.End)
         {
-            GameMgr.Deltatime = 0;
+            GlobalValue.Deltatime = 0;
         }        
 
         if (Delay > 0.0f)
@@ -79,27 +68,61 @@ public class GameMgr : MonoBehaviour
                 Delay = 0.0f;
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) && Delay == 0.0f && GlobalValue.g_GameState == GameState.Starting)
+        
+
+        if (Input.GetKeyDown(KeyCode.X))
         {
-            _Enter();
-            Delay = 1.0f;
+            GlobalValue.g_GameState = GameState.End;
         }
 
+        _Enter();
         BGM_Controll();
+    }
+
+    void SetUp()
+    {
+        DieObj.SetActive(false);            
+        QualitySettings.vSyncCount = 0;     //Scene Setup
+        Application.targetFrameRate = 60;  
+        Pointer.SetActive(true);
+
+        if (EndObj != null)
+        {
+            EndObj.SetActive(false);
+        }
+
+        if (DieObj != null)
+        {
+            DieObj.SetActive(false);
+        }
+
+        GlobalValue.g_GameState = GameState.Starting;
+        GlobalValue.PlayerInvenList = new List<string>();    //열쇠정보를 저장하는 리스트
+
+        Delay = 0.0f;                       
+        HelpIdx = 0;
+        Spawn = false;
     }
 
     void _Enter()
     {
+        if (!(Input.GetKeyDown(KeyCode.Return) && Delay == 0.0f && GlobalValue.g_GameState == GameState.Starting))
+        {
+            return;
+        }
+
         HelpIdx++;
         if(HelpIdx > 1)
         {
             StoryObj.gameObject.SetActive(false);
-            GameMgr.Deltatime = 0.02f;            
+            GlobalValue.Deltatime = 0.02f;            
             GlobalValue.g_GameState = GameState.Playing;
             aud.Stop();
         }
         Txt[0].gameObject.SetActive(false);
         Txt[1].gameObject.SetActive(true);
+
+        Delay = 1.0f;
     }
 
     void BGM_Controll()
@@ -138,6 +161,7 @@ public class GameMgr : MonoBehaviour
         if (FindObjectOfType<EnemyCtrl>() == null)
             return;
 
+        //Enemy가 쫓아올 시 사운드
         if (EnemyCtrl.Inst.CurAnimState == AnimState.trace)
         {
             if(!aud.isPlaying)
@@ -154,38 +178,36 @@ public class GameMgr : MonoBehaviour
                 aud.Stop();
             }
         }
-
-               
     }
 
     IEnumerator ThxPlay()
     {
         if (EndObj != null)
+        {
             EndObj.SetActive(true);
-        yield return new WaitForSeconds(10f);
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit(); // 어플리케이션 종료
-#endif
-        yield break;
+        }
+
+        yield return new WaitForSeconds(12.0f);
+        yield return StartCoroutine(Retry());
     }
 
     IEnumerator You_Die()
     {
         if (DieObj != null)
+        {
             DieObj.SetActive(true);
+        }
+
+        yield return new WaitForSeconds(3.0f);
         yield return StartCoroutine(Retry());
 
     }
 
     IEnumerator Retry()
     {
-        Destroy(EnemyCtrl.Inst.gameObject);
-        GlobalValue.PlayerInvenList.Clear();
-        GlobalValue.g_GameState = GameState.Starting;
-        yield return new WaitForSeconds(3.0f);
-        SceneManager.LoadScene("InGameScene");            
+        Destroy(GameObject.Find("DontDestroy").gameObject); //씬으로 전환 시 중복 생성을 막기위해 기존 Setting파괴
+        SceneManager.LoadScene("TitleScene");
+        yield return 0;
     }
 
 }

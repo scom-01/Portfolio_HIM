@@ -6,20 +6,17 @@ using UnityEngine.EventSystems;
 
 public class Setting : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    [HideInInspector] public static bool SettingBool = false;
-
     [Header("SettingPanel")]
     public GameObject SettingPanel;
     public Toggle ControllBtn;
     public Toggle SoundBtn;
-    public Button SaveBtn;
     public Button BackBtn;
     public Button ExitGameBtn;
 
-    [Header("GlobalValue")]
+    [Header("Controll")]
     public GameObject ControllSettingObj;
 
-    [Header("SoundSetting")]
+    [Header("Sound")]
     public GameObject SoundSettingObj;
 
     public static Setting Inst;
@@ -32,9 +29,6 @@ public class Setting : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandle
     // Start is called before the first frame update
     void Start()
     {
-        if (SaveBtn != null)
-            SaveBtn.onClick.AddListener(SaveGame);
-
         if (ExitGameBtn != null)
             ExitGameBtn.onClick.AddListener(ExitGame);
 
@@ -65,9 +59,8 @@ public class Setting : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandle
                 //ClearSetting();
             }
 
-            //ClearSetting();
-            SettingBool = !SettingBool;
-            GameMgr.Deltatime = 0.02f;
+            GlobalValue.SettingBool = !GlobalValue.SettingBool;
+            GlobalValue.Deltatime = 0.02f;
             //Time.timeScale = 1.0f;           
             //Destroy(this.gameObject);
         }
@@ -76,41 +69,14 @@ public class Setting : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandle
         
         SoundSettingObj.SetActive(SoundBtn.isOn);
 
-        SettingPanel.gameObject.SetActive(SettingBool);
-    }
-
-    void SaveGame()
-    {
-        
-        //GameMgr.Deltatime = 0.02f;
-
-        //---SettingSave
-
-        PlayerPrefs.SetInt("Move_Forward", (int)GlobalValue.Move_Forward);
-        //Debug.Log((KeyCode)PlayerPrefs.GetInt("Move_Forward"));   //W
-        PlayerPrefs.SetInt("Move_Left", (int)GlobalValue.Move_Left);
-        PlayerPrefs.SetInt("Move_Right", (int)GlobalValue.Move_Right);
-        PlayerPrefs.SetInt("Move_Back", (int)GlobalValue.Move_Back);
-        PlayerPrefs.SetInt("Peeking_Left", (int)GlobalValue.Peeking_Left);
-        PlayerPrefs.SetInt("Peeking_Right", (int)GlobalValue.Peeking_Right);
-        PlayerPrefs.SetInt("Sprint", (int)GlobalValue.Sprint);
-        PlayerPrefs.SetInt("Sit", (int)GlobalValue.Sit);
-        PlayerPrefs.SetInt("Use", (int)GlobalValue.Use);
-        PlayerPrefs.SetInt("Detection", (int)GlobalValue.Detection);
-        //---SettingSave
-
-        SettingBool = !SettingBool;
-        //Destroy(this.gameObject);        
+        SettingPanel.gameObject.SetActive(GlobalValue.SettingBool);
     }
 
     void Back()
     {
-    //    ClearSetting();
-        SettingBool = !SettingBool;
         ControllSettingObj.GetComponent<ControllSetting>().Cancle();
         SoundSettingObj.GetComponent<SoundSetting>().Cancle();
-        GameMgr.Deltatime = 0.02f;       
-        //Destroy(this.gameObject);
+        GlobalValue.SettingBool = !GlobalValue.SettingBool;
     }
 
     void ExitGame()

@@ -3,6 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+public enum AnimState
+{
+    idle,
+    move,
+    trace,  //=run
+    attack,
+    turn,
+    detec_walk,
+    waypoint,
+    stun,
+    count
+}
+
 public class EnemyCtrl : MonoBehaviour
 {
     Transform tr;
@@ -10,7 +23,6 @@ public class EnemyCtrl : MonoBehaviour
     //----MonsterAI
     [HideInInspector] public GameObject m_AggroTarget = null;
     [HideInInspector] public Vector3 AggroTargetPos;
-    //int m_AggroTgID = -1;                 //이 몬스터가 공격해야할 캐럭터의 고유번호
     Vector3 m_MoveDir = Vector3.zero;       //수평 진행 노멀 방향 벡터
     Vector3 m_CacVLen = Vector3.zero;       //어그로타겟을 향하는 벡터
     float m_CacDist = 0.0f;                 //거리 계산용 변수
@@ -28,12 +40,12 @@ public class EnemyCtrl : MonoBehaviour
     //----MonsterAI
 
     //---- Navigation
-    protected NavMeshAgent nvAgent;    //using UnityEngine.AI;
-    protected NavMeshPath movePath;
-    protected Vector3 m_PathEndPos = Vector3.zero;
+    private NavMeshAgent nvAgent;    //using UnityEngine.AI;
+    private NavMeshPath movePath;
+    private Vector3 m_PathEndPos = Vector3.zero;
     int m_CurPathIndex = 1;
-    protected double m_MoveDurTime = 0.0;     //목표점까지 도착하는데 걸리는 시간
-    protected double m_AddTimeCount = 0.0;    //누적시간 카운트 
+    private double m_MoveDurTime = 0.0;     //목표점까지 도착하는데 걸리는 시간
+    private double m_AddTimeCount = 0.0;    //누적시간 카운트 
     float m_MoveTick = 0.0f;
     //bool NvMoveBool = false;
     private RaycastHit hit;
@@ -59,17 +71,13 @@ public class EnemyCtrl : MonoBehaviour
     public GameObject FootPos;
     public FloorMtrl Mtrl;
 
-    //public SphereCollider DetectionSphere;
-    //public Anim anim;
-
     //Animation m_RefAnimation = null;
     Animator m_RefAnimator = null;
     AnimatorStateInfo animatorStateInfo;
     [HideInInspector] public AnimState CurAnimState = AnimState.idle;
     [HideInInspector] public AnimState OldAnimState = AnimState.idle;
-    //float CountTime = 5.0f;
 
-    public float Go_WayPointTime = 3.0f;
+    public float Go_WayPointTime = 3.0f;    //WayPoint로 되돌아가기 위한 변수
     public GameObject BeforeObj;
 
     public static EnemyCtrl Inst;
@@ -85,7 +93,7 @@ public class EnemyCtrl : MonoBehaviour
         nvAgent = this.gameObject.GetComponent<NavMeshAgent>();
         nvAgent.updateRotation = false;
         tr = this.transform;
-        m_RefAnimator = this.gameObject.GetComponent<Animator>();        
+        m_RefAnimator = this.gameObject.GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -96,12 +104,12 @@ public class EnemyCtrl : MonoBehaviour
 
         Mtrl = FootPos.GetComponent<FloorSoundMtrl>().Mtrl;
 
-        if (GameMgr.Deltatime == 0.0f)
+        if (GlobalValue.Deltatime == 0.0f)
             m_RefAnimator.speed = 0.0f;
         else
             m_RefAnimator.speed = 1.0f;
 
-        m_MoveTick -= GameMgr.Deltatime;
+        m_MoveTick -= GlobalValue.Deltatime;
         if (m_MoveTick < 0.0f)
             m_MoveTick = 0.0f;
 
@@ -110,14 +118,14 @@ public class EnemyCtrl : MonoBehaviour
         //플레이어 인식 시간 카운트
         if (Recog_time > 0.0f)
         {
-            Recog_time -= GameMgr.Deltatime;
+            Recog_time -= GlobalValue.Deltatime;
             if (Recog_time <= 0.0f)
                 Recog_time = 0.0f;
         }
 
         if (Go_WayPointTime > 0.0f)
         {
-            Go_WayPointTime -= GameMgr.Deltatime;
+            Go_WayPointTime -= GlobalValue.Deltatime;
             if (Go_WayPointTime <= 0.0f)
                 Go_WayPointTime = 0.0f;
         }
@@ -175,7 +183,7 @@ public class EnemyCtrl : MonoBehaviour
                 int layerMask = ((1 << LayerMask.NameToLayer("Default")) | (1 << LayerMask.NameToLayer("DOORFRAME")) | (1 << LayerMask.NameToLayer("SOUND")));
                 if (Physics.Raycast(ray, out hit, m_RayDist, ~layerMask))   //Default, DOORFRAME, SOUND Layer무시
                 {
-                    if (hit.transform.tag.Contains("Untagged") || hit.transform.tag.Contains("Wall")|| hit.transform.tag.Contains("Door") || hit.transform.tag.Contains("Floor"))
+                    if (hit.transform.tag.Contains("Untagged") || hit.transform.tag.Contains("Wall") || hit.transform.tag.Contains("Door") || hit.transform.tag.Contains("Floor"))
                     {
                         m_AggroTarget = null;   //어그로타겟 null                       
                         return;
@@ -241,7 +249,7 @@ public class EnemyCtrl : MonoBehaviour
                 int layerMask = ((1 << LayerMask.NameToLayer("Default")) | (1 << LayerMask.NameToLayer("DOORFRAME")) | (1 << LayerMask.NameToLayer("SOUND")));
                 if (Physics.Raycast(ray, out hit, m_RayDist, ~layerMask))   //Default, DOORFRAME, SOUND Layer무시
                 {
-                    if (hit.transform.tag.Contains("Untagged") || hit.transform.tag.Contains("Wall")|| hit.transform.tag.Contains("Door"))
+                    if (hit.transform.tag.Contains("Untagged") || hit.transform.tag.Contains("Wall") || hit.transform.tag.Contains("Door"))
                     {
                         return;
                     }
@@ -267,14 +275,14 @@ public class EnemyCtrl : MonoBehaviour
                 //가장 가까운 WayPoint
                 List<WayPointAI> WaypointsList = new List<WayPointAI>();
                 WayPointAI[] Waypoints = FindObjectsOfType<WayPointAI>();
-                if(BeforeObj != null)
+                if (BeforeObj != null)
                 {
-                    for(int i =0;i<Waypoints.Length;i++)
+                    for (int i = 0; i < Waypoints.Length; i++)
                     {
-                        if(Waypoints[i].name != BeforeObj.name)
-                        {                            
+                        if (Waypoints[i].name != BeforeObj.name)
+                        {
                             WaypointsList.Add(Waypoints[i]);
-                        }     
+                        }
                     }
                 }
                 else
@@ -318,7 +326,7 @@ public class EnemyCtrl : MonoBehaviour
             if (0.0001f < m_MoveDir.magnitude)   //어그로타겟과 딱붙어있는게 아닌 경우
             {
                 a_TargetRot = Quaternion.LookRotation(m_MoveDir);   //어그로타겟을 바라보는 벡터를 향하는 Quaternion Rotation
-                transform.rotation = Quaternion.Slerp(transform.rotation, a_TargetRot, GameMgr.Deltatime * m_RotSpeed); //보간회전
+                transform.rotation = Quaternion.Slerp(transform.rotation, a_TargetRot, GlobalValue.Deltatime * m_RotSpeed); //보간회전
             }
 
             MySetAnim(AnimState.attack);
@@ -503,7 +511,7 @@ public class EnemyCtrl : MonoBehaviour
         {
             a_CurCPos = this.transform.position;
             a_CacDestV = movePath.corners[m_CurPathIndex];  //경로상에서 지나지않은 가장 가까운 코너
-            //a_CurCPos.y = a_CacDestV.y;  //높이 오차가 있어서 도착 판정을 못하는 경우가 있다. 
+            a_CurCPos.y = a_CacDestV.y;  //높이 오차가 있어서 도착 판정을 못하는 경우가 있다. 
             a_TargetDir = a_CacDestV - a_CurCPos;           //현재위치에서 경로상의 코너를 향하는 벡터
             a_TargetDir.y = 0.0f;
             a_TargetDir.Normalize();                        //단위벡터화
@@ -511,13 +519,13 @@ public class EnemyCtrl : MonoBehaviour
             a_CacSpeed = m_MoveVelocity;
             a_CacSpeed = a_CacSpeed * overSpeed;
 
-            a_NowStep = a_CacSpeed * GameMgr.Deltatime;     //이번에 이동했을 때 이 안으로만 들어와도 무조건 도착한 것으로 본다.
+            a_NowStep = a_CacSpeed * GlobalValue.Deltatime;     //이번에 이동했을 때 이 안으로만 들어와도 무조건 도착한 것으로 본다.
 
             a_Velocity = a_CacSpeed * a_TargetDir;      //한 걸음 크기
             a_Velocity.y = 0.0f;
 
             //nvAgent움직임과 모션 멈추기
-            if (GameMgr.Deltatime == 0.0f)
+            if (GlobalValue.Deltatime == 0.0f)
             {
                 nvAgent.velocity = Vector3.zero;
                 nvAgent.isStopped = true;
@@ -525,7 +533,7 @@ public class EnemyCtrl : MonoBehaviour
                 nvAgent.updateRotation = false;
             }
             else
-            {   
+            {
                 nvAgent.velocity = a_Velocity;          //이동 처리...
                 StepSound();
                 nvAgent.isStopped = false;
@@ -544,7 +552,7 @@ public class EnemyCtrl : MonoBehaviour
             }//if ((a_CacDestV - a_CurCPos).magnitude <= a_NowStep) //중간점에 도착한 것으로 본다.  
             //경로상의 코너를 지났을 때 다음 코너를 지정해주는 코드
 
-            m_AddTimeCount = m_AddTimeCount + GameMgr.Deltatime;    //이동시간 카운트
+            m_AddTimeCount = m_AddTimeCount + GlobalValue.Deltatime;    //이동시간 카운트
             if (m_MoveDurTime <= m_AddTimeCount) //목표점에 도착한 것으로 판정한다.
             {
                 m_CurPathIndex = movePath.corners.Length;
@@ -562,7 +570,7 @@ public class EnemyCtrl : MonoBehaviour
             {
                 Quaternion a_TargetRot = Quaternion.LookRotation(a_vTowardNom);
                 transform.rotation = Quaternion.Slerp(transform.rotation,
-                                            a_TargetRot, GameMgr.Deltatime * m_RotSpeed);
+                                            a_TargetRot, GlobalValue.Deltatime * m_RotSpeed);
             }
             MySetAnim(A_State);
             //-------------캐릭터 회전 / 애니메이션 방향 조정
@@ -618,7 +626,7 @@ public class EnemyCtrl : MonoBehaviour
                 m_RefAnimator.SetBool("waypoint", false);
         }
         else if (newAnim == AnimState.trace)
-        {        
+        {
             if (m_RefAnimator.GetBool("attack"))
                 m_RefAnimator.SetBool("attack", false);
             if (m_RefAnimator.GetBool("detec_walk"))
@@ -649,8 +657,9 @@ public class EnemyCtrl : MonoBehaviour
         OldAnimState = newAnim;
     }
 
+    //Animantion Event로 호출 : Attack()
     public void Attack()
-    {        
+    {
         Vector3 AttDir = NavMove.Inst.transform.position - this.transform.position;
         float AttDAttDist = AttDir.magnitude;
         float AttDot = Vector3.Dot(AttDir, this.transform.forward);
@@ -679,9 +688,9 @@ public class EnemyCtrl : MonoBehaviour
     void StepSound()
     {
         Vector3 FootStepPosition = FootPos.transform.position;
-        audTime += GameMgr.Deltatime;
+        audTime += GlobalValue.Deltatime;
 
-        if(audTime>=0.5f &&( CurAnimState == AnimState.detec_walk || CurAnimState == AnimState.waypoint))
+        if (audTime >= 0.5f && (CurAnimState == AnimState.detec_walk || CurAnimState == AnimState.waypoint))
         {
             if (Mtrl == FloorMtrl.Grass)
             {
@@ -705,7 +714,7 @@ public class EnemyCtrl : MonoBehaviour
             }
             audTime = 0.0f;
         }
-        else if(audTime >= 0.3f && CurAnimState ==AnimState.trace)  //쫓아올때
+        else if (audTime >= 0.3f && CurAnimState == AnimState.trace)  //쫓아올때
         {
             if (Mtrl == FloorMtrl.Grass)
             {
@@ -729,6 +738,6 @@ public class EnemyCtrl : MonoBehaviour
             }
             audTime = 0.0f;
         }
-        
+
     }
 }

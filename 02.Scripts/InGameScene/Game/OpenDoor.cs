@@ -9,7 +9,7 @@ public class OpenDoor : MonoBehaviour
 
     private Vector3 defaultRot;
     private Vector3 openRot;
-    [HideInInspector]public bool open;
+    [HideInInspector] public bool open;
     private bool enter;
 
     public GameObject Key;
@@ -28,44 +28,48 @@ public class OpenDoor : MonoBehaviour
     {
         if (open)
         {
-            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, openRot, GameMgr.Deltatime * smooth);
+            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, openRot, GlobalValue.Deltatime * smooth);
         }
         else
         {
-            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, defaultRot, GameMgr.Deltatime * smooth);
+            transform.eulerAngles = Vector3.Slerp(transform.eulerAngles, defaultRot, GlobalValue.Deltatime * smooth);
         }
 
-
-        if (Input.GetKeyDown(GlobalValue.Use) && enter)
+        if (!(Input.GetKeyDown(GlobalValue.Use) && enter))
         {
-            if(Key != null) //키가 필요하다면
+            return;
+        }
+
+        if (Key != null) //키가 필요하다면
+        {
+            if (GlobalValue.PlayerInvenList == null)
             {
-                if(GlobalValue.PlayerInvenList !=null)
-                {
-                    for (int i = 0; i < GlobalValue.PlayerInvenList.Count; i++)
-                    {
-                        if (GlobalValue.PlayerInvenList[i].Contains(Key.name))    //플레이어가 키가 있는지 확인
-                        {
-                            open = !open;
-                            if(!aud.isPlaying)
-                                aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
-                            break;
-                        }
-                    }
-                }                
+                return;
             }
-            else
+
+            for (int i = 0; i < GlobalValue.PlayerInvenList.Count; i++)
             {
-                open = !open;
-                if (!aud.isPlaying)
-                    aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
+                if (GlobalValue.PlayerInvenList[i].Contains(Key.name))    //플레이어가 키가 있는지 확인
+                {
+                    open = !open;
+                    if (!aud.isPlaying)
+                        aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
+                    break;
+                }
             }
         }
-                
+        else
+        {
+            open = !open;
+            if (!aud.isPlaying)
+            {
+                aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
+            }   
+        }
     }
 
     void OnTriggerEnter(Collider col)
-    {   
+    {
         if (col.tag == "Enemy")
         {
             if (Key != null) //키가 필요하다면
@@ -97,7 +101,7 @@ public class OpenDoor : MonoBehaviour
         {
             enter = false;
         }
-        else if(col.tag == "Enemy")
+        else if (col.tag == "Enemy")
         {
             if (Key != null) //키가 필요하다면
             {
@@ -112,7 +116,7 @@ public class OpenDoor : MonoBehaviour
                                 aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
                             break;
                         }
-                    }                    
+                    }
                 }
             }
             else
@@ -129,6 +133,6 @@ public class OpenDoor : MonoBehaviour
         if (col.tag == "Player")
         {
             enter = true;
-        }        
+        }
     }
 }

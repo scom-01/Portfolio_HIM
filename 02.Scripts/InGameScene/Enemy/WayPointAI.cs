@@ -5,7 +5,7 @@ using UnityEngine;
 public class WayPointAI : MonoBehaviour
 {
     public GameObject[] WayPosObj;
-    
+
     [HideInInspector] public GameObject NextWayObj;
     [HideInInspector] public GameObject BeforeWayObj;
     //private Transform[] points;
@@ -17,12 +17,6 @@ public class WayPointAI : MonoBehaviour
     void Start()
     {
         WayPosCount = WayPosObj.Length;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void OnDrawGizmos()
@@ -41,9 +35,6 @@ public class WayPointAI : MonoBehaviour
     }
     void WayPointListInit()
     {
-        //전부 제거 후 추가
-        //if(RandomNextWayObj !=null)  
-        
         if (RandomNextWayObj.Count > 0)
         {
             RandomNextWayObj.RemoveRange(0, RandomNextWayObj.Count);
@@ -56,10 +47,10 @@ public class WayPointAI : MonoBehaviour
 
     }
 
-    private void OnTriggerEnter(Collider coll) 
+    private void OnTriggerEnter(Collider coll)
     {
-        if(coll.tag.Contains("Enemy"))  //Enemy의 Capsule Collider
-        {   
+        if (coll.tag.Contains("Enemy"))  //Enemy의 Capsule Collider
+        {
             if (coll.transform.parent.GetComponent<EnemyCtrl>().CurAnimState == AnimState.waypoint)  //waypoint를 이용해 이동하던 중에 도착했을 때만
             {
                 //Debug.Log("적 waypoint옴!");
@@ -101,9 +92,4 @@ public class WayPointAI : MonoBehaviour
             //Debug.DrawLine(this.transform.position, NextWayObj.transform.position, Color.red);
         }
     }
-
-    //private void OnTriggerExit(Collider col)
-    //{
-    //    WayPointListInit();
-    //}
 }

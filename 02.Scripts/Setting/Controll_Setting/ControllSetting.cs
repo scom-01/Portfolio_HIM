@@ -6,28 +6,16 @@ using UnityEngine.UI;
 public class ControllSetting : MonoBehaviour
 {
     public static ArrayList ControlKeySet = new ArrayList();
-    //public static KeyCode Move_Forward;
-    //public static KeyCode Move_Left;
-    //public static KeyCode Move_Right;
-    //public static KeyCode Move_Back;
-    //public static KeyCode Peeking_Left;
-    //public static KeyCode Peeking_Right;
-    //public static KeyCode Sprint;
-    //public static KeyCode Sit;
-    //public static KeyCode Use;
-    //public static KeyCode Detection;
-
-    //public static float mouseSpeed = 6.0f;  //MoveCtrl.cs 마우스x축 움직임 //MoveCam.cs 마우스y축 움직임
 
     [Header("Button")]
-    public Button SaveBtn;
-    public Button CancleBtn;
-    public Button ResetBtn;
+    [SerializeField] private Button SaveBtn;
+    [SerializeField] private Button CancleBtn;
+    [SerializeField] private Button ResetBtn;
 
     [Header("Message")]
-    public GameObject Message;
-    public Button OkBtn;
-    public Button NoBtn;
+    [SerializeField] private GameObject Message;
+    [SerializeField] private Button OkBtn;
+    [SerializeField] private Button NoBtn;
 
     SliderSetting m_mousesetting;
     // Start is called before the first frame update
@@ -87,11 +75,6 @@ public class ControllSetting : MonoBehaviour
         m_mousesetting = this.GetComponentInChildren<SliderSetting>();
     }
 
-    // Update is called once per frame
-    //void Update()
-    //{
-
-    //}
 
     void Save()
     {
@@ -112,14 +95,15 @@ public class ControllSetting : MonoBehaviour
                 ControlKeySet.Remove((KeyCode)PlayerPrefs.GetInt(CtrlKey[i].name)); //그 전의 KeyCode를 빼고 
                 Debug.Log((KeyCode)PlayerPrefs.GetInt(CtrlKey[i].name) + " / 삭제");
                 PlayerPrefs.SetInt(CtrlKey[i].name, (int)CtrlKey[i].CtrlKeyCode);   //로컬에 저장
-                Debug.Log(CtrlKey[i].name + " : " + CtrlKey[i].CtrlKeyCode + "로 저장");                
-                //Debug.Log((KeyCode)PlayerPrefs.GetInt(CtrlKey[i].name));
-                //ControlKeySet.Add(CtrlKey[i].CtrlKeyCode);  //바꾼 KeyCode를 추가
+                Debug.Log(CtrlKey[i].name + " : " + CtrlKey[i].CtrlKeyCode + "로 저장");  
+
                 ControlKeySet.Insert(i, CtrlKey[i].CtrlKeyCode);
+
                 for (int h = 0; h < ControlKeySet.Count; h++)
                 {
                     Debug.Log(h+" / " +ControlKeySet[h].ToString());                    
                 }
+
                 GlobalValue.Move_Forward = (KeyCode)ControlKeySet[0];
                 GlobalValue.Move_Left = (KeyCode)ControlKeySet[1];
                 GlobalValue.Move_Right = (KeyCode)ControlKeySet[2];
@@ -130,6 +114,7 @@ public class ControllSetting : MonoBehaviour
                 GlobalValue.Sit = (KeyCode)ControlKeySet[7];
                 GlobalValue.Use = (KeyCode)ControlKeySet[8];
                 GlobalValue.Detection = (KeyCode)ControlKeySet[9];
+
             }
                 
             //저장
@@ -140,6 +125,17 @@ public class ControllSetting : MonoBehaviour
 
             CtrlKey[i].ClickOnOff = false;
             //키 설정 취소
+
+            PlayerPrefs.SetInt("Move_Forward", (int)GlobalValue.Move_Forward);
+            PlayerPrefs.SetInt("Move_Left", (int)GlobalValue.Move_Left);
+            PlayerPrefs.SetInt("Move_Right", (int)GlobalValue.Move_Right);
+            PlayerPrefs.SetInt("Move_Back", (int)GlobalValue.Move_Back);
+            PlayerPrefs.SetInt("Peeking_Left", (int)GlobalValue.Peeking_Left);
+            PlayerPrefs.SetInt("Peeking_Right", (int)GlobalValue.Peeking_Right);
+            PlayerPrefs.SetInt("Sprint", (int)GlobalValue.Sprint);
+            PlayerPrefs.SetInt("Sit", (int)GlobalValue.Sit);
+            PlayerPrefs.SetInt("Use", (int)GlobalValue.Use);
+            PlayerPrefs.SetInt("Detection", (int)GlobalValue.Detection);
         }
         //----------컨트롤 키 저장
         #endregion

@@ -23,9 +23,9 @@ public class FootStep : MonoBehaviour
     {
         if (FootStepSoundCountTime > 0.0f)
         {
-            FootStepSoundCountTime -= GameMgr.Deltatime;
+            FootStepSoundCountTime -= GlobalValue.Deltatime;
             if (DetectionRange_spherecoll.radius < MaxSize)
-                DetectionRange_spherecoll.radius += GameMgr.Deltatime;
+                DetectionRange_spherecoll.radius += GlobalValue.Deltatime;
             else
                 DetectionRange_spherecoll.radius = MaxSize;
         }
