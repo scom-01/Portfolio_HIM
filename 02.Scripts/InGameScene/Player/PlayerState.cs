@@ -33,19 +33,19 @@ public class PlayerState : MonoBehaviour
             if (Hp >= 100.0f)
                 Hp = 100.0f;
 
-            if(GlobalValue.SettingBool)
+            if (!aud.isPlaying)
+            {
+                aud.volume = GlobalValue.SE_Value * GlobalValue.SE_Bool;
+                aud.Play();
+            }
+
+            if (GlobalValue.SettingBool)
             {
                 aud.Pause();
             }
             else
             {
                 aud.UnPause();
-            }
-
-            if (!aud.isPlaying)
-            {
-                aud.volume = GlobalValue.SE_Value * GlobalValue.SE_Bool;
-                aud.Play();
             }
         }
         else

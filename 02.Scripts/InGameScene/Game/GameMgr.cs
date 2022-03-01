@@ -56,7 +56,7 @@ public class GameMgr : MonoBehaviour
 
         Pointer.SetActive(!GlobalValue.SettingBool);     
         
-        if(GlobalValue.g_GameState == GameState.Starting || GlobalValue.g_GameState == GameState.End)
+        if(GlobalValue.g_GameState == GameState.Starting || GlobalValue.g_GameState == GameState.End || GlobalValue.g_GameState == GameState.Die)
         {
             GlobalValue.Deltatime = 0;
         }        
@@ -66,13 +66,6 @@ public class GameMgr : MonoBehaviour
             Delay -= Time.deltaTime;
             if (Delay <= 0.0f)
                 Delay = 0.0f;
-        }
-
-        
-
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            GlobalValue.g_GameState = GameState.End;
         }
 
         _Enter();
@@ -161,14 +154,24 @@ public class GameMgr : MonoBehaviour
         if (FindObjectOfType<EnemyCtrl>() == null)
             return;
 
-        //Enemy가 쫓아올 시 사운드
-        if (EnemyCtrl.Inst.CurAnimState == AnimState.trace)
+        //Enemy가 쫓아오거나 공격 시 사운드
+        if (EnemyCtrl.Inst.CurAnimState == AnimState.trace || EnemyCtrl.Inst.CurAnimState == AnimState.attack)
         {
             if(!aud.isPlaying)
             {
                 aud.clip = BGM_Clip[1];
                 aud.Play();
             }
+
+            if (GlobalValue.SettingBool)
+            {
+                aud.Pause();
+            }
+            else
+            {
+                aud.UnPause();
+            }
+
             aud.volume = GlobalValue.SE_Value * GlobalValue.SE_Bool;
         }
         else
@@ -187,7 +190,7 @@ public class GameMgr : MonoBehaviour
             EndObj.SetActive(true);
         }
 
-        yield return new WaitForSeconds(12.0f);
+        yield return new WaitForSeconds(10.0f);
         yield return StartCoroutine(Retry());
     }
 
@@ -198,7 +201,7 @@ public class GameMgr : MonoBehaviour
             DieObj.SetActive(true);
         }
 
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(5.0f);
         yield return StartCoroutine(Retry());
 
     }

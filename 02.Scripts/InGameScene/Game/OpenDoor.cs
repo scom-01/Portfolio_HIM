@@ -53,7 +53,9 @@ public class OpenDoor : MonoBehaviour
                 {
                     open = !open;
                     if (!aud.isPlaying)
+                    {
                         aud.PlayOneShot(audioclip, GlobalValue.SE_Value * GlobalValue.SE_Bool * 0.1f);
+                    }
                     break;
                 }
             }
